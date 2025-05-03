@@ -1,0 +1,10 @@
+requests
+pandas
+numpy
+matplotlib
+seaborn
+scikit-learn
+jupyter
+python-dotenv
+requests
+helius
