@@ -10,14 +10,14 @@ import streamlit as st
 st.set_page_config(page_title="Solana Validators Dashboard", layout="wide")
 
 # Load the data
-df_validators = joblib.load('notebook_and_app/df_validators.joblib')
-df_expanded = joblib.load('notebook_and_app/df_expanded.joblib')
-df_cleaned = joblib.load('notebook_and_app/df_cleaned.joblib')
-df_tps = joblib.load('notebook_and_app/df_tps.joblib')
-df_supply = joblib.load('notebook_and_app/df_supply.joblib')
-df_fees = joblib.load('notebook_and_app/df_fees.joblib')
-df_inflation = joblib.load('notebook_and_app/df_inflation.joblib')
-df_epochs = joblib.load('notebook_and_app/df_epochs.joblib')
+df_validators = joblib.load('df_validators.joblib')
+df_expanded = joblib.load('df_expanded.joblib')
+df_cleaned = joblib.load('df_cleaned.joblib')
+df_tps = joblib.load('df_tps.joblib')
+df_supply = joblib.load('df_supply.joblib')
+df_fees = joblib.load('df_fees.joblib')
+df_inflation = joblib.load('df_inflation.joblib')
+df_epochs = joblib.load('df_epochs.joblib')
 
 # Prepare merged DataFrame
 df_expanded['vote_account'] = df_expanded['votePubkey']
