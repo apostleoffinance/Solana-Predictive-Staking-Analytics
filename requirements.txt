@@ -8,3 +8,5 @@ jupyter
 python-dotenv
 requests
 helius
+streamlit
+plotly

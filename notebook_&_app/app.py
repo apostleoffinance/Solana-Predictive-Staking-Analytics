@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import joblib
 import plotly.express as px
+import matplotlib.pyplot as plt
 import streamlit as st
 
 # Page configuration
@@ -41,7 +42,7 @@ st.markdown(
 # Navigation buttons (horizontal radio buttons)
 section = st.radio(
     "Navigate to Section",
-    ["Overview", "Validator Performance", "Rewards"],
+    ["Overview", "Validator Performance", "Staking Reward"],
     index=0,  # Default to Overview
     format_func=lambda x: x,  # Display labels as-is
     horizontal=True,  # Horizontal layout
@@ -277,3 +278,121 @@ elif section == "Validator Performance":
             xaxis_tickangle=-45  # Rotate x-axis labels for readability
         )
         st.plotly_chart(stake_fig, use_container_width=True)
+
+
+# --- Staking Reward ---
+elif section == "Staking Reward":
+    with st.container():
+        st.markdown(
+            """
+            <div style="border: 1px solid #CCC; padding: 10px; border-radius: 5px; background-color: #8A4AF3;">
+            """,
+            unsafe_allow_html=True,
+        )
+        
+        st.title("Staking Reward")
+
+        # Prepare staking rewards data
+        df_epochs = df_epochs.copy()
+        df_epochs['total_reward_SOL'] = df_epochs['total_rewards'] / 1e9
+        df_epochs['total_active_stake_SOL'] = df_epochs['total_active_stake'] / 1e9
+
+        # Convert to object type to allow string + float
+        df_epochs['total_reward_SOL'] = df_epochs['total_reward_SOL'].astype('object')
+        df_epochs['total_active_stake_SOL'] = df_epochs['total_active_stake_SOL'].astype('object')
+
+        df_epochs.loc[0, ['total_reward_SOL', 'total_active_stake_SOL']] = 'ongoing'
+
+        staking_rewards = df_epochs[
+            ['epoch', 'total_reward_SOL', 'total_active_stake_SOL']
+        ]
+
+         # Pagination setup
+        rows_per_page = 10
+        total_rows = len(staking_rewards)
+        total_pages = (total_rows - 1) // rows_per_page + 1
+
+        # Initialize session state for page navigation
+        if 'current_page' not in st.session_state:
+            st.session_state.current_page = 0
+
+        # Navigation buttons
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col1:
+            if st.button("Previous 10") and st.session_state.current_page > 0:
+                st.session_state.current_page -= 1
+        with col2:
+            st.write(f"Page {st.session_state.current_page + 1} of {total_pages} (Showing rows {st.session_state.current_page * rows_per_page + 1} to {min((st.session_state.current_page + 1) * rows_per_page, total_rows)})")
+        with col3:
+            if st.button("Next 10") and (st.session_state.current_page + 1) < total_pages:
+                st.session_state.current_page += 1
+
+        # Slice the data for the current page
+        start_idx = st.session_state.current_page * rows_per_page
+        end_idx = min((st.session_state.current_page + 1) * rows_per_page, total_rows)
+        display_rewards = staking_rewards.iloc[start_idx:end_idx].copy()
+
+        # Display staking rewards table
+        st.subheader("Staking Rewards by Epoch")
+        display_rewards = display_rewards.rename(columns={
+            'epoch': 'Epoch',
+            'total_reward_SOL': 'Total Reward (SOL)',
+            'total_active_stake_SOL': 'Total Active Stake (SOL)'
+        })
+
+        # Format numerical values where not 'ongoing'
+        display_rewards['Total Reward (SOL)'] = display_rewards['Total Reward (SOL)'].apply(
+            lambda x: f"{float(x):,.2f}" if x != 'ongoing' else x
+        )
+        display_rewards['Total Active Stake (SOL)'] = display_rewards['Total Active Stake (SOL)'].apply(
+            lambda x: f"{float(x):,.2f}" if x != 'ongoing' else x
+        )
+
+        st.dataframe(display_rewards, use_container_width=True)
+
+        
+        # Staking Rewards and Active Stake per Epoch Graph
+        # Filter out 'ongoing' rows and convert types
+        staking_rewards_filtered = staking_rewards[
+            staking_rewards['total_active_stake_SOL'] != 'ongoing'
+        ].copy()
+
+        staking_rewards_filtered['total_reward_SOL'] = staking_rewards_filtered['total_reward_SOL'].astype(float)
+        staking_rewards_filtered['total_active_stake_SOL'] = staking_rewards_filtered['total_active_stake_SOL'].astype(float)
+
+        fig, ax1 = plt.subplots(figsize=(12, 6))
+        fig.patch.set_facecolor('#0e1117')  # Dark background for the figure
+        ax1.set_facecolor('#0e1117')        # Dark background for the bar axis
+
+        # Bar for rewards
+        ax1.bar(
+            staking_rewards_filtered['epoch'], 
+            staking_rewards_filtered['total_reward_SOL'], 
+            color="#00FFF0", 
+            label='Total Reward (SOL)'
+        )
+        ax1.set_xlabel("Epoch")
+        ax1.set_ylabel("Reward (SOL)", color="#00FFF0")
+        ax1.tick_params(axis='y', labelcolor="#00FFF0")
+
+        # Line for active stake
+        ax2 = ax1.twinx()
+        ax2.plot(
+            staking_rewards_filtered['epoch'], 
+            staking_rewards_filtered['total_active_stake_SOL'], 
+            color="#8A4AF3", 
+            marker='o', 
+            label='Total Active Stake (SOL)'
+        )
+        ax2.set_ylabel("Active Stake (SOL)", color="#8A4AF3")
+        ax2.tick_params(axis='y', labelcolor="#8A4AF3")
+
+        # Titles and layout
+        fig.suptitle("Staking Rewards and Active Stake per Epoch")
+        fig.tight_layout()
+
+        # Display in Streamlit
+        st.pyplot(fig)
+
+        st.markdown("---")
+
