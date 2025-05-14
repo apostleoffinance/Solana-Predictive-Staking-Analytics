@@ -25,6 +25,32 @@ df_merge = df_validators.merge(df_expanded, how = 'left', on = ['vote_account', 
 df_merge["active_stake_SOL"] = df_merge["active_stake"] / 1e9
 df_merge['name'] = df_merge['name'].replace([None, 'None'], 'Unknown')
 
+
+# Sidebar with About Section
+with st.sidebar:
+    st.markdown(
+        """
+        <div style="background-color: #8A4AF3; padding: 10px; border-radius: 5px; margin-bottom: 20px;">
+            <h3 style="color: #00FFF0; text-align: center; margin: 0;">About Solana Validators Dashboard</h3>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    st.markdown(
+        """
+        ### 
+        Welcome to the Solana Validators Dashboard, a simple and user-friendly web-based tool designed to help you explore and understand the Solana blockchain like never before! This dashboard lets you dive into validator performance, track staking rewards, and get a clear picture of key network metrics—all in one place.
+
+        Built with ease of use in mind, it offers an interactive interface where you can:
+        - Check out how validators are performing across different epochs.
+        - See detailed staking rewards and active stake trends with handy charts.
+        - Get a quick overview of the network, including total validators, transactions per second (TPS), and SOL supply breakdown.
+
+        Whether you're a blockchain enthusiast, a validator operator, or just curious about Solana, this dashboard makes it simple to stay informed. Created with love using Streamlit, Pandas, Plotly, and Matplotlib, it’s designed to bring Solana’s data to life with a sleek, Solana-inspired look. Enjoy exploring!
+        """,
+        unsafe_allow_html=True
+    )
+
 # # Sidebar
 # st.sidebar.title("Navigation")
 # section = st.sidebar.radio("Go to", ["Overview", "Validator Performance", "Rewards"])
