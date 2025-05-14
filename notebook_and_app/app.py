@@ -353,6 +353,7 @@ elif section == "Staking Reward":
         
         # Staking Rewards and Active Stake per Epoch Graph
         # Filter out 'ongoing' rows and convert types
+        st.subheader("Staking Rewards and Active Stake per Epoch")
         staking_rewards_filtered = staking_rewards[
             staking_rewards['total_active_stake_SOL'] != 'ongoing'
         ].copy()
